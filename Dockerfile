@@ -1,20 +1,17 @@
-# Dockerfile para PHP + Apache, para projeto em subpasta CRUDTCC
+# Usa imagem base do PHP com Apache
 FROM php:8.2-apache
 
-# Ativa o mod_rewrite para URLs amigáveis
+# Habilita mod_rewrite do Apache
 RUN a2enmod rewrite
 
-# Remove conteúdo padrão do Apache
-RUN rm -rf /var/www/html/*
+# Instala extensões necessárias
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 
-# Copia o conteúdo da subpasta CRUDTCC para o DocumentRoot
-COPY CRUDTCC/ /var/www/html/
+# Copia os arquivos do projeto para o diretório padrão do Apache
+COPY CRUDTCC /var/www/html/
 
-# Ajusta permissões para evitar erros de acesso
-RUN chown -R www-data:www-data /var/www/html \
- && find /var/www/html -type d -exec chmod 755 {} \; \
- && find /var/www/html -type f -exec chmod 644 {} \;
+# Define permissões apropriadas
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
+# Expondo a porta padrão do Apache
 EXPOSE 80
-
-CMD ["apache2-foreground"]
